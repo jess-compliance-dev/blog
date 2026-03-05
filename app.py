@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import json
 
 app = Flask(__name__)
@@ -26,18 +26,20 @@ def add():
 
         posts = load_posts()
 
+        new_id = max(post['id'] for post in posts) + 1 if posts else 1
+
         new_post = {
-            "id": len(posts) + 1,
-            "author": request.form['author'],
-            "title": request.form['title'],
-            "content": request.form['content']
+            "id": new_id,
+            "author": request.form.get("author"),
+            "title": request.form.get("title"),
+            "content": request.form.get("content")
         }
 
         posts.append(new_post)
 
         save_posts(posts)
 
-        return redirect('/')
+        return redirect(url_for('index'))
 
     return render_template('add.html')
 
