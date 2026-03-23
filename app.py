@@ -5,23 +5,30 @@ app = Flask(__name__)
 
 
 def load_posts():
-    with open("posts.json", "r") as file:
-        return json.load(file)
+    """Loads all blog posts from the JSON file and returns them as a list."""
+    try:
+        with open("posts.json", "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
 
 
 def save_posts(posts):
+    """Saves the given list of blog posts to the JSON file."""
     with open("posts.json", "w") as file:
         json.dump(posts, file, indent=4)
 
 
 @app.route('/')
 def index():
+    """Displays the homepage with all available blog posts."""
     blog_posts = load_posts()
     return render_template('index.html', posts=blog_posts)
 
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    """Handles adding a new blog post via a form."""
     if request.method == 'POST':
         posts = load_posts()
         new_id = max(post['id'] for post in posts) + 1 if posts else 1
@@ -39,6 +46,7 @@ def add():
 
 @app.route('/delete/<int:post_id>')
 def delete(post_id):
+    """Deletes a blog post by its ID."""
     posts = load_posts()
     posts = [post for post in posts if post['id'] != post_id]
     save_posts(posts)
@@ -47,6 +55,7 @@ def delete(post_id):
 
 @app.route('/update/<int:post_id>', methods=['GET', 'POST'])
 def update(post_id):
+    """Updates an existing blog post."""
     posts = load_posts()
     post = next((p for p in posts if p['id'] == post_id), None)
     if post is None:
@@ -64,6 +73,7 @@ def update(post_id):
 
 @app.route('/like/<int:post_id>')
 def like(post_id):
+    """Increments the like count of a blog post by one."""
     posts = load_posts()
 
     for post in posts:
@@ -77,4 +87,5 @@ def like(post_id):
 
 
 if __name__ == '__main__':
+    """Starts the Flask application in debug mode."""
     app.run(host="0.0.0.0", port=5000, debug=True)
